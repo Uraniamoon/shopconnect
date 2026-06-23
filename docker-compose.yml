@@ -1,0 +1,64 @@
+services:
+  
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracle-db
+    ports:
+      - "1521:1521"  # Puerto estándar para conectar  por fuera 
+    environment:
+      - ORACLE_PASSWORD=admin  # La contraseña del usuario 'system'
+    volumes:
+      - oracle_data:/opt/oracle/oradata  # Tus tablas no se borran al apagar el contenedor
+
+  # 1. Microservicio de Usuarios
+  ms-usuarios:
+    build: ./ms-usuarios
+    container_name: ms-usuarios
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+
+  # 2. Microservicio de Productos
+  ms-productos:
+    build: ./ms-productos
+    container_name: ms-productos
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+
+  # 3. Microservicio de Inventario
+  ms-inventario:
+    build: ./ms-inventario
+    container_name: ms-inventario
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+
+  # 4. Microservicio de Pagos
+  ms-pagos:
+    build: ./ms-pagos
+    container_name: ms-pagos
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+
+  # 5. Microservicio de Pedidos
+  ms-pedidos:
+    build: ./ms-pedidos
+    container_name: ms-pedidos
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+
+volumes:
+  oracle_data:  
