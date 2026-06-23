@@ -43,12 +43,12 @@ public class usuario {
 
 
     @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "id_rol_usuario", nullable = false)
+    @JoinColumn(name = "id_rol_usuario")
     private RolUsuario tipo;
 
 
     @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "id_direccion", nullable = false)
+    @JoinColumn(name = "id_direccion")
     private Direccion direccion;
 
 

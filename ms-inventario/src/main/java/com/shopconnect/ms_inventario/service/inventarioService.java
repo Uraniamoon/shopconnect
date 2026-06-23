@@ -1,6 +1,6 @@
 package com.shopconnect.ms_inventario.service;
 
-import com.shopconnect.ms_inventario.Dto.InventarioDTO;
+import com.shopconnect.ms_inventario.dto.InventarioDTO;
 import com.shopconnect.ms_inventario.model.Inventario;
 import com.shopconnect.ms_inventario.repository.inventarioRepository;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,22 @@ public class inventarioService {
                 .collect(Collectors.toList());
     }
 
-    // 3. Método para actualizar o agregar stock aplicando reglas de negocio
+    // 3. Buscar inventario por su ID
+    public InventarioDTO obtenerInventarioPorId(Long id) {
+        Inventario entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado con ID: " + id));
+        return new InventarioDTO(entity.getIdInventario(), entity.getStockActual());
+    }
+
+    // 4. Eliminar inventario por su ID
+    public void eliminarInventario(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Inventario no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    // 5. Método para actualizar o agregar stock aplicando reglas de negocio
     public InventarioDTO guardarStockReal(InventarioDTO dto) {
         // Aquí puedes meter reglas de negocio: ej. verificar que el stock no sea negativo
         if (dto.getStockActual() < 0) {

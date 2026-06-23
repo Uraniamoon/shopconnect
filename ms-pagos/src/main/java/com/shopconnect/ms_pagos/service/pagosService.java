@@ -1,6 +1,6 @@
 package com.shopconnect.ms_pagos.service;
 
-import com.shopconnect.ms_pagos.Dto.PagoDTO;
+import com.shopconnect.ms_pagos.dto.PagoDTO;
 import com.shopconnect.ms_pagos.model.Pago;
 import com.shopconnect.ms_pagos.repository.pagosRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,22 @@ public class pagosService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Procesar y guardar un pago real con reglas de negocio
+    // 2. Buscar un pago por su ID de pedido
+    public PagoDTO obtenerPagoPorId(Long id) {
+        Pago pago = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
+        return new PagoDTO(pago.getPedidoId(), pago.getMonto().doubleValue());
+    }
+
+    // 3. Eliminar un pago por su ID
+    public void eliminarPago(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Pago no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    // 4. Procesar y guardar un pago real con reglas de negocio
     public PagoDTO guardarPagoReal(PagoDTO dto) {
         // Regla de negocio básica: El pago debe tener un monto válido
         if (dto.getMonto() <= 0) {

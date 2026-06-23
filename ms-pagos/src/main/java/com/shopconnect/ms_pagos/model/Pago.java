@@ -31,7 +31,7 @@ public class Pago {
     private Long pedidoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_metodo_pago", nullable = false)
+    @JoinColumn(name = "id_metodo_pago")
     private MetodoPago metodoPago;
 
     public Pago() {}

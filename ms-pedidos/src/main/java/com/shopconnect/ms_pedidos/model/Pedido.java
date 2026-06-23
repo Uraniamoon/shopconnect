@@ -37,7 +37,7 @@ public class Pedido {
     private Long usuarioId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_estado_pedido", nullable = false)
+    @JoinColumn(name = "id_estado_pedido")
     private EstadoPedido estadoPedido;
 
     public Pedido() {}

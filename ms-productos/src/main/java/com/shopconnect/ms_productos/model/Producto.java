@@ -47,11 +47,11 @@ public class Producto {
 
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_categoria", nullable = false)
+    @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_marca", nullable = false)
+    @JoinColumn(name = "id_marca")
     private Marca marca;
 
     @OneToMany(mappedBy = "producto")
@@ -93,6 +93,10 @@ public class Producto {
         + "',precio=" + precio 
         + ",stock=" + stock 
         + ",sku='" + sku + "'}";}
+
+    public Long getId_producto() {
+        return id_producto;
+    }
 
     
 }
