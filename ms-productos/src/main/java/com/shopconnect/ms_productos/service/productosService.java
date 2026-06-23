@@ -1,6 +1,6 @@
 package com.shopconnect.ms_productos.service;
 
-import com.shopconnect.ms_productos.Dto.ProductoDTO;
+import com.shopconnect.ms_productos.dto.ProductoDTO;
 import com.shopconnect.ms_productos.model.Producto;
 import com.shopconnect.ms_productos.repository.productosRepository;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,22 @@ public class productosService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Guardar un producto nuevo de forma real en la base de datos
+    // 2. Buscar un producto por su ID
+    public ProductoDTO obtenerProductoPorId(Long id) {
+        Producto prod = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+        return new ProductoDTO(prod.getId_producto(), prod.getNombre(), prod.getPrecio().doubleValue());
+    }
+
+    // 3. Eliminar un producto por su ID
+    public void eliminarProducto(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Producto no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    // 4. Guardar un producto nuevo de forma real en la base de datos
     public ProductoDTO guardarProductoReal(ProductoDTO dto) {
         // Regla de negocio elemental: El precio de venta no puede ser gratis ni negativo
         if (dto.getPrecioVenta() <= 0) {
@@ -39,9 +54,10 @@ public class productosService {
 
         Producto nuevoProd = new Producto();
         nuevoProd.setNombre(dto.getNombre());
-        nuevoProd.setPrecio(BigDecimal.valueOf(dto.getPrecioVenta())); // Mapeo seguro a BigDecimal financiero
+        nuevoProd.setPrecio(BigDecimal.valueOf(dto.getPrecioVenta()));
+        nuevoProd.setSku("SKU-" + System.currentTimeMillis());
+        nuevoProd.setStock(1);
 
-        // Persistencia real en Oracle XE a través de JPA
         Producto guardado = repository.save(nuevoProd);
 
         // Devolvemos el DTO de confirmación limpio para el catálogo

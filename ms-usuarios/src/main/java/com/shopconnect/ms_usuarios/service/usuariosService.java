@@ -1,6 +1,6 @@
 package com.shopconnect.ms_usuarios.service;
 
-import com.shopconnect.ms_usuarios.Dto.UsuarioDTO;
+import com.shopconnect.ms_usuarios.dto.UsuarioDTO;
 import com.shopconnect.ms_usuarios.model.usuario;
 import com.shopconnect.ms_usuarios.repository.usuariosRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,22 @@ public class usuariosService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Registrar y guardar un usuario nuevo de forma real en la base de datos
+    // 2. Buscar un usuario por su ID
+    public UsuarioDTO obtenerUsuarioPorId(Long id) {
+        usuario user = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        return new UsuarioDTO(user.getIdUsuario(), user.getNombre(), user.getEmail());
+    }
+
+    // 3. Eliminar un usuario por su ID
+    public void eliminarUsuario(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Usuario no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    // 4. Registrar y guardar un usuario nuevo de forma real en la base de datos
     public UsuarioDTO guardarUsuarioReal(UsuarioDTO dto) {
         // Regla de negocio elemental: El correo electrónico no puede venir vacío
         if (dto.getCorreoElectronico() == null || dto.getCorreoElectronico().trim().isEmpty()) {

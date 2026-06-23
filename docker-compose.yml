@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   
   oracle-db:
@@ -18,6 +16,7 @@ services:
     container_name: ms-usuarios
     ports:
       - "8081:8081"
+    restart: unless-stopped
     depends_on:
       - oracle-db
 
@@ -27,6 +26,7 @@ services:
     container_name: ms-productos
     ports:
       - "8082:8082"
+    restart: unless-stopped
     depends_on:
       - oracle-db
 
@@ -36,10 +36,9 @@ services:
     container_name: ms-inventario
     ports:
       - "8083:8083"
+    restart: unless-stopped
     depends_on:
       - oracle-db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-db:1521:XE
 
   # 4. Microservicio de Pagos
   ms-pagos:
@@ -47,6 +46,7 @@ services:
     container_name: ms-pagos
     ports:
       - "8084:8084"
+    restart: unless-stopped
     depends_on:
       - oracle-db
 
@@ -55,7 +55,8 @@ services:
     build: ./ms-pedidos
     container_name: ms-pedidos
     ports:
-      - "8085:8085"  # En el 8085 para que no choque con usuarios
+      - "8085:8085"
+    restart: unless-stopped
     depends_on:
       - oracle-db
 

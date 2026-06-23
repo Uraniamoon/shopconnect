@@ -1,6 +1,6 @@
 package com.shopconnect.ms_pedidos.service;
 
-import com.shopconnect.ms_pedidos.Dto.PedidoDTO;
+import com.shopconnect.ms_pedidos.dto.PedidoDTO;
 import com.shopconnect.ms_pedidos.model.Pedido;
 import com.shopconnect.ms_pedidos.repository.pedidosRepository;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,22 @@ public class pedidosService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Crear y guardar un pedido real en la base de datos
+    // 2. Buscar un pedido por su ID
+    public PedidoDTO obtenerPedidoPorId(Long id) {
+        Pedido pedido = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
+        return new PedidoDTO(pedido.getId(), pedido.getTotal().doubleValue(), "PAGADO");
+    }
+
+    // 3. Eliminar un pedido por su ID
+    public void eliminarPedido(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Pedido no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    // 4. Crear y guardar un pedido real en la base de datos
     public PedidoDTO guardarPedidoReal(PedidoDTO dto) {
         // Regla de negocio: No se procesan órdenes vacías o en cero
         if (dto.getTotal() <= 0) {
