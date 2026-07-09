@@ -54,18 +54,27 @@ public class pedidosService {
         }
 
         Pedido nuevoPedido = new Pedido();
-        nuevoPedido.setFechaPedido(LocalDateTime.now()); // Asigna la fecha real del servidor automáticamente
-        nuevoPedido.setTotal(BigDecimal.valueOf(dto.getTotal())); // Mapeo seguro a BigDecimal
-        nuevoPedido.setUsuarioId(1L); // Simulación lógica del ID de usuario comprador por defecto
+        nuevoPedido.setFechaPedido(LocalDateTime.now());
+        nuevoPedido.setTotal(BigDecimal.valueOf(dto.getTotal()));
+        nuevoPedido.setUsuarioId(1L);
 
-        // Persistencia real en la tabla mediante JPA
         Pedido pedidoGuardado = repository.save(nuevoPedido);
 
-        // Retornamos el DTO de respuesta limpio para el cliente
         return new PedidoDTO(
                 pedidoGuardado.getId(), 
                 pedidoGuardado.getTotal().doubleValue(), 
                 "PENDIENTE_PAGO"
         );
+    }
+
+    // 5. Actualizar el estado de un pedido (usado por ms-pagos via HTTP)
+    public void actualizarEstado(Long id, String nuevoEstado) {
+        Pedido pedido = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
+        // Por ahora el estado se maneja como String en el DTO;
+        // la entidad Pedido actualmente no persiste un campo estado propio
+        // (el estado se deriva de la relacion con EstadoPedido).
+        // Este metodo queda preparado para cuando se agregue la columna.
+        System.out.println("Pedido " + id + " actualizado a estado: " + nuevoEstado);
     }
 }

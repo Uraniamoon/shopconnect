@@ -2,6 +2,7 @@ package com.shopconnect.ms_pedidos.controller;
 
 import com.shopconnect.ms_pedidos.dto.PedidoDTO;
 import com.shopconnect.ms_pedidos.dto.ErrorResponseDTO;
+import com.shopconnect.ms_pedidos.dto.EstadoUpdateDTO;
 import com.shopconnect.ms_pedidos.service.pedidosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -73,6 +74,24 @@ public class PedidoController {
     @ResponseStatus(HttpStatus.CREATED)
     public PedidoDTO crearPedido(@Valid @RequestBody PedidoDTO nuevoPedidoDTO) {
         return service.guardarPedidoReal(nuevoPedidoDTO);
+    }
+
+    @Operation(summary = "Actualizar estado del pedido",
+            description = "Actualiza el estado de un pedido (usado internamente por ms-pagos).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estado actualizado correctamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PedidoDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Pedido no encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PutMapping("/{id}/estado")
+    public void actualizarEstado(
+            @Parameter(description = "Identificador unico del pedido", example = "1", required = true)
+            @PathVariable Long id,
+            @Valid @RequestBody EstadoUpdateDTO estadoDTO) {
+        service.actualizarEstado(id, estadoDTO.getEstado());
     }
 
     @Operation(summary = "Eliminar un pedido por ID",

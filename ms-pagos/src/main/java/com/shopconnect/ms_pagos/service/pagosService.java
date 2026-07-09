@@ -1,9 +1,12 @@
 package com.shopconnect.ms_pagos.service;
 
+import com.shopconnect.ms_pagos.dto.EstadoUpdateDTO;
 import com.shopconnect.ms_pagos.dto.PagoDTO;
+import com.shopconnect.ms_pagos.dto.PedidoRemotoDTO;
 import com.shopconnect.ms_pagos.model.Pago;
 import com.shopconnect.ms_pagos.repository.pagosRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,13 +15,22 @@ import java.util.stream.Collectors;
 public class pagosService {
 
     private final pagosRepository repository;
+    private final RestTemplate restTemplate;
+    private final String pedidosUrl;
 
-    // Inyección por constructor obligatoria para la rúbrica
-    public pagosService(pagosRepository repository) {
+    public pagosService(pagosRepository repository, RestTemplate restTemplate) {
         this.repository = repository;
+        this.restTemplate = restTemplate;
+        this.pedidosUrl = "http://host.docker.internal:8085";
     }
 
-    // 1. Obtener todos los pagos reales de la base de datos Oracle
+    // Constructor usado por tests para inyectar URL personalizada
+    public pagosService(pagosRepository repository, RestTemplate restTemplate, String pedidosUrl) {
+        this.repository = repository;
+        this.restTemplate = restTemplate;
+        this.pedidosUrl = pedidosUrl;
+    }
+
     public List<PagoDTO> obtenerPagosReales() {
         return repository.findAll()
                 .stream()
@@ -26,14 +38,12 @@ public class pagosService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Buscar un pago por su ID de pedido
     public PagoDTO obtenerPagoPorId(Long id) {
         Pago pago = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
         return new PagoDTO(pago.getPedidoId(), pago.getMonto().doubleValue());
     }
 
-    // 3. Eliminar un pago por su ID
     public void eliminarPago(Long id) {
         if (!repository.existsById(id)) {
             throw new RuntimeException("Pago no encontrado con ID: " + id);
@@ -41,22 +51,35 @@ public class pagosService {
         repository.deleteById(id);
     }
 
-    // 4. Procesar y guardar un pago real con reglas de negocio
     public PagoDTO guardarPagoReal(PagoDTO dto) {
-        // Regla de negocio básica: El pago debe tener un monto válido
         if (dto.getMonto() <= 0) {
             throw new RuntimeException("El monto del pago debe ser mayor a cero");
         }
 
+        // Validar que el pedido existe via HTTP hacia ms-pedidos
+        PedidoRemotoDTO pedido = restTemplate.getForObject(
+                pedidosUrl + "/api/pedidos/{id}",
+                PedidoRemotoDTO.class,
+                dto.getIdPedido()
+        );
+
+        if (pedido == null) {
+            throw new RuntimeException("Pedido con ID " + dto.getIdPedido() + " no existe");
+        }
+
         Pago nuevoPago = new Pago();
         nuevoPago.setPedidoId(dto.getIdPedido());
-        // Convertimos el Double del DTO al BigDecimal que exige tu entidad Pago
-        nuevoPago.setMonto(BigDecimal.valueOf(dto.getMonto())); 
+        nuevoPago.setMonto(BigDecimal.valueOf(dto.getMonto()));
 
-        // Guardamos en la base de datos Oracle
         Pago pagoGuardado = repository.save(nuevoPago);
 
-        // Retornamos el DTO de confirmación segura
+        // Actualizar estado del pedido a PAGADO via HTTP
+        restTemplate.put(
+                pedidosUrl + "/api/pedidos/{id}/estado",
+                new EstadoUpdateDTO("PAGADO"),
+                dto.getIdPedido()
+        );
+
         return new PagoDTO(pagoGuardado.getPedidoId(), pagoGuardado.getMonto().doubleValue());
     }
 }
