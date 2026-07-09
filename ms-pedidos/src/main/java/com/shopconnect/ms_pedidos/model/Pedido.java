@@ -40,6 +40,9 @@ public class Pedido {
     @JoinColumn(name = "id_estado_pedido")
     private EstadoPedido estadoPedido;
 
+    @Column(name = "estado_texto")
+    private String estado = "PENDIENTE_PAGO";
+
     public Pedido() {}
 
     public Pedido(LocalDateTime fechaPedido, BigDecimal total, Long usuarioId, EstadoPedido estadoPedido) {
@@ -63,7 +66,9 @@ public class Pedido {
 
     public EstadoPedido getEstadoPedido() { return estadoPedido; }
     public void setEstadoPedido(EstadoPedido estadoPedido) { this.estadoPedido = estadoPedido; }
-
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    
     @Override
     public String toString() {
         return "Pedido{id=" + id +

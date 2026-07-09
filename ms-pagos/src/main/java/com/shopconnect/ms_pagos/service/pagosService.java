@@ -6,6 +6,7 @@ import com.shopconnect.ms_pagos.dto.PedidoRemotoDTO;
 import com.shopconnect.ms_pagos.model.Pago;
 import com.shopconnect.ms_pagos.repository.pagosRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,11 +18,11 @@ public class pagosService {
     private final pagosRepository repository;
     private final RestTemplate restTemplate;
     private final String pedidosUrl;
-
+    @Autowired
     public pagosService(pagosRepository repository, RestTemplate restTemplate) {
         this.repository = repository;
         this.restTemplate = restTemplate;
-        this.pedidosUrl = "http://host.docker.internal:8085";
+        this.pedidosUrl = "http://ms-pedidos:8085";
     }
 
     // Constructor usado por tests para inyectar URL personalizada
